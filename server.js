@@ -8,9 +8,6 @@ const { xss } = require("express-xss-sanitizer");
 const hpp = require("hpp");
 const cors = require("cors");
 
-//Load env vars
-dotenv.config({ path: "./config/config.env" });
-
 //Connect to database
 connectDB();
 
