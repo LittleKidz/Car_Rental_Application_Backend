@@ -20,9 +20,22 @@ app.set("query parser", "extended");
 app.use(express.json());
 
 //CORS
+const allowedOrigins = [process.env.FRONTEND_URL].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: function (origin, callback) {
+      // allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // allow any .vercel.app domain
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
   }),
 );
