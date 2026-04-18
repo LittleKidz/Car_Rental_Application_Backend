@@ -21,9 +21,7 @@ exports.protect = async (req, res, next) => {
     //verify Token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    console.log(decoded);
-
-    req.user = await User.findById(decoded.id);
+    req.user = await User.findById(decoded.id).select("name email role telephone");
 
     next();
   } catch (err) {

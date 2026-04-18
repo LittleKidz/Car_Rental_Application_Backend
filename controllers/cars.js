@@ -8,16 +8,14 @@ const Rental = require("../models/Rental");
 exports.getCarBookings = async (req, res, next) => {
   try {
     // Find all cars of this provider
-    const cars = await Car.find({ provider: req.params.providerId }).select(
-      "_id",
-    );
+    const cars = await Car.find({ provider: req.params.providerId }).select("_id").lean();
     const carIds = cars.map((c) => c._id);
 
     // Find all rentals for those cars (only future/current)
     const bookings = await Rental.find({
       car: { $in: carIds },
       returnDate: { $gte: new Date() },
-    }).select("car rentalDate returnDate -_id");
+    }).select("car rentalDate returnDate -_id").lean();
 
     res.status(200).json({ success: true, data: bookings });
   } catch (err) {
@@ -39,12 +37,12 @@ exports.getCars = async (req, res, next) => {
     query = Car.find({ provider: req.params.providerId }).populate({
       path: "provider",
       select: "name address telephone",
-    });
+    }).lean();
   } else {
     query = Car.find().populate({
       path: "provider",
       select: "name address telephone",
-    });
+    }).lean();
   }
 
   try {
@@ -66,7 +64,7 @@ exports.getCar = async (req, res, next) => {
     const car = await Car.findById(req.params.id).populate({
       path: "provider",
       select: "name address telephone",
-    });
+    }).lean();
 
     if (!car) {
       return res.status(404).json({

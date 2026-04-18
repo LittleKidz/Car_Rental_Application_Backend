@@ -1,4 +1,5 @@
 const express = require("express");
+const compression = require("compression");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config/config.env" });
 const cookieParser = require("cookie-parser");
@@ -16,6 +17,9 @@ const app = express();
 
 //Query parser
 app.set("query parser", "extended");
+
+//Compress responses
+app.use(compression());
 
 //Body parser
 app.use(express.json());

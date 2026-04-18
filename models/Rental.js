@@ -51,4 +51,9 @@ const RentalSchema = new mongoose.Schema({
   },
 });
 
+RentalSchema.index({ user: 1 });
+RentalSchema.index({ provider: 1 });
+RentalSchema.index({ car: 1, returnDate: 1 });
+RentalSchema.index({ car: 1, paymentStatus: 1, rentalDate: 1, returnDate: 1 });
+
 module.exports = mongoose.model("Rental", RentalSchema);
