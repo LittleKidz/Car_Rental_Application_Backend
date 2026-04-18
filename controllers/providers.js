@@ -15,6 +15,8 @@ exports.getProviders = async (req, res, next) => {
 
   //Loop over removeFields and delete them from reqQuery
   removeFields.forEach((param) => delete reqQuery[param]);
+  console.log(reqQuery);
+
   //Create query String
   let queryStr = JSON.stringify(reqQuery);
   queryStr = queryStr.replace(
@@ -22,7 +24,8 @@ exports.getProviders = async (req, res, next) => {
     (match) => `$${match}`,
   );
   query = Provider.find(JSON.parse(queryStr))
-    .populate({ path: "cars", select: "_id" });
+    .populate("rentals")
+    .populate("cars");
 
   //Select Fields
   if (req.query.select) {

@@ -50,6 +50,4 @@ const CarSchema = new mongoose.Schema(
   },
 );
 
-CarSchema.index({ provider: 1 });
-
 module.exports = mongoose.model("Car", CarSchema);
