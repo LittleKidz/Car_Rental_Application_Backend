@@ -1,6 +1,7 @@
 const Provider = require("../models/Provider");
 const Rental = require("../models/Rental");
 const Car = require("../models/Car");
+const Rental = require("../models/Rental");
 //@desc Get all Providers
 //@route GET /api/v1/providers
 //@access Public
@@ -89,6 +90,38 @@ exports.getProvider = async (req, res, next) => {
     res.status(200).json({ success: true, data: provider });
   } catch (err) {
     res.status(400).json({ success: false });
+  }
+};
+
+//@desc  Get provider with cars and bookings in one request
+//@route GET /api/providers/:id/detail
+//@access Public
+exports.getProviderDetail = async (req, res) => {
+  try {
+    const [provider, cars, bookings] = await Promise.all([
+      Provider.findById(req.params.id),
+      Car.find({ provider: req.params.id }),
+      Rental.find({
+        provider: req.params.id,
+        paymentStatus: { $ne: "refunded" },
+      }).select("car rentalDate returnDate"),
+    ]);
+
+    if (!provider) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Provider not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { provider, cars, bookings },
+    });
+  } catch (err) {
+    console.error(err.stack);
+    res
+      .status(500)
+      .json({ success: false, message: "Cannot fetch provider detail" });
   }
 };
 
