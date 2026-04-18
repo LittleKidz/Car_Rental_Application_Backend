@@ -1,7 +1,6 @@
 const Provider = require("../models/Provider");
 const Rental = require("../models/Rental");
 const Car = require("../models/Car");
-const Rental = require("../models/Rental");
 //@desc Get all Providers
 //@route GET /api/v1/providers
 //@access Public
