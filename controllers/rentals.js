@@ -58,16 +58,19 @@ exports.getRentals = async (req, res) => {
         user: req.user.id,
         paymentStatus: "pending",
         rentalDate: { $lt: new Date() },
-      });
+      }).populate({ path: "car", select: "brand model licensePlate" });
       if (expired.length > 0) {
         await Promise.all(
-          expired.map((rental) =>
-            Notification.create({
+          expired.map((rental) => {
+            const carLabel = rental.car
+              ? `${rental.car.brand} ${rental.car.model} (${rental.car.licensePlate})`
+              : "your car";
+            return Notification.create({
               user: rental.user,
               rental: rental._id,
-              message: `Your booking on ${rental.rentalDate.toISOString().split("T")[0]} was automatically cancelled as payment was not completed before the pickup date.`,
-            }),
-          ),
+              message: `Your ${carLabel} booking on ${rental.rentalDate.toISOString().split("T")[0]} was automatically cancelled as payment was not completed before the pickup date.`,
+            });
+          }),
         );
         await Rental.deleteMany({ _id: { $in: expired.map((r) => r._id) } });
       }
