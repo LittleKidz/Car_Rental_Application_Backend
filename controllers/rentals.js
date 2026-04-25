@@ -33,7 +33,7 @@ function isOwnerOrAdmin(rental, user) {
 function calcTotalAmount(car, rentalDate, returnDate) {
   const days = Math.max(
     1,
-    Math.ceil((new Date(returnDate) - new Date(rentalDate)) / 86_400_000)
+    Math.ceil((new Date(returnDate) - new Date(rentalDate)) / 86_400_000),
   );
   return car.dailyRate * days;
 }
@@ -61,7 +61,9 @@ exports.getRentals = async (req, res) => {
     }
 
     const rentals = await populatedRentalQuery(baseQuery);
-    res.status(200).json({ success: true, count: rentals.length, data: rentals });
+    res
+      .status(200)
+      .json({ success: true, count: rentals.length, data: rentals });
   } catch (err) {
     console.error(err.stack);
     res.status(500).json({ success: false, message: "Cannot find rentals" });
@@ -146,7 +148,11 @@ exports.addRental = async (req, res) => {
     }
 
     if (req.user.role !== "admin") {
-      const existingCount = await Rental.countDocuments({ user: req.user.id });
+      const existingCount = await Rental.countDocuments({
+        user: req.user.id,
+        returnDate: { $gt: new Date() },
+        paymentStatus: { $ne: "refunded" },
+      });
       if (existingCount >= 3) {
         return res.status(400).json({
           success: false,
@@ -282,6 +288,8 @@ exports.checkCarAvailability = async (req, res) => {
     });
   } catch (err) {
     console.error(err.stack);
-    res.status(500).json({ success: false, message: "Error checking availability" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error checking availability" });
   }
 };
