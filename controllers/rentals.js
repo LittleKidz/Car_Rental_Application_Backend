@@ -1,6 +1,7 @@
 const Rental = require("../models/Rental");
 const Provider = require("../models/Provider");
 const Car = require("../models/Car");
+const Notification = require("../models/Notification");
 
 const CAR_SELECT =
   "brand model year color licensePlate dailyRate available image";
@@ -51,6 +52,27 @@ exports.isOwnerOrAdmin = isOwnerOrAdmin;
 //@access Private
 exports.getRentals = async (req, res) => {
   try {
+    // Auto-expire pending rentals whose pickup date has passed
+    if (req.user.role !== "admin") {
+      const expired = await Rental.find({
+        user: req.user.id,
+        paymentStatus: "pending",
+        rentalDate: { $lt: new Date() },
+      });
+      if (expired.length > 0) {
+        await Promise.all(
+          expired.map((rental) =>
+            Notification.create({
+              user: rental.user,
+              rental: rental._id,
+              message: `Your booking on ${rental.rentalDate.toISOString().split("T")[0]} was automatically cancelled as payment was not completed before the pickup date.`,
+            }),
+          ),
+        );
+        await Rental.deleteMany({ _id: { $in: expired.map((r) => r._id) } });
+      }
+    }
+
     let baseQuery;
     if (req.user.role !== "admin") {
       baseQuery = Rental.find({ user: req.user.id });
