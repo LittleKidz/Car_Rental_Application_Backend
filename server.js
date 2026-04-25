@@ -62,6 +62,8 @@ const auth = require("./routes/auth");
 const rentals = require("./routes/rentals");
 const cars = require("./routes/cars");
 const notifications = require("./routes/notifications");
+const reviews = require("./routes/reviews");
+const reviewsAdmin = require("./routes/reviews-admin");
 
 //Mount routers
 app.use("/api/providers", providers);
@@ -69,6 +71,8 @@ app.use("/api/auth", auth);
 app.use("/api/rentals", rentals);
 app.use("/api/cars", cars);
 app.use("/api/notifications", notifications);
+app.use("/api/providers/:providerId/reviews", reviews);
+app.use("/api/reviews", reviewsAdmin);
 
 const PORT = process.env.PORT || 5000;
 

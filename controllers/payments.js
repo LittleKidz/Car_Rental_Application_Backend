@@ -223,7 +223,7 @@ exports.cancelRental = async (req, res) => {
         .json({ success: false, message: "Not authorized" });
     }
 
-    if (rental.paymentStatus === "refunded") {
+    if (rental.paymentStatus === "refunded" || rental.refundStatus !== "none") {
       return res
         .status(400)
         .json({ success: false, message: "This rental is already cancelled" });
@@ -243,8 +243,6 @@ exports.cancelRental = async (req, res) => {
 
     rental.cancelledAt = new Date();
     rental.refundStatus = "requested";
-    rental.paymentStatus =
-      rental.paymentStatus === "paid" ? "refunded" : "refunded";
     await rental.save();
 
     await createNotification(

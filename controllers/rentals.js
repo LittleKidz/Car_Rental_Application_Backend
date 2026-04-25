@@ -33,7 +33,7 @@ function isOwnerOrAdmin(rental, user) {
 function calcTotalAmount(car, rentalDate, returnDate) {
   const days = Math.max(
     1,
-    Math.ceil((new Date(returnDate) - new Date(rentalDate)) / 86_400_000),
+    Math.ceil((new Date(returnDate) - new Date(rentalDate)) / 86_400_000)
   );
   return car.dailyRate * days;
 }
@@ -61,9 +61,7 @@ exports.getRentals = async (req, res) => {
     }
 
     const rentals = await populatedRentalQuery(baseQuery);
-    res
-      .status(200)
-      .json({ success: true, count: rentals.length, data: rentals });
+    res.status(200).json({ success: true, count: rentals.length, data: rentals });
   } catch (err) {
     console.error(err.stack);
     res.status(500).json({ success: false, message: "Cannot find rentals" });
@@ -82,6 +80,15 @@ exports.getRental = async (req, res) => {
         message: `No rental with the id of ${req.params.id}`,
       });
     }
+
+    const ownerId =
+      typeof rental.user === "object"
+        ? rental.user._id.toString()
+        : rental.user.toString();
+    if (ownerId !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
+
     res.status(200).json({ success: true, data: rental });
   } catch (err) {
     console.error(err.stack);
@@ -152,6 +159,7 @@ exports.addRental = async (req, res) => {
         user: req.user.id,
         returnDate: { $gt: new Date() },
         paymentStatus: { $ne: "refunded" },
+        refundStatus: "none",
       });
       if (existingCount >= 3) {
         return res.status(400).json({
@@ -288,8 +296,6 @@ exports.checkCarAvailability = async (req, res) => {
     });
   } catch (err) {
     console.error(err.stack);
-    res
-      .status(500)
-      .json({ success: false, message: "Error checking availability" });
+    res.status(500).json({ success: false, message: "Error checking availability" });
   }
 };
