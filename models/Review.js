@@ -35,6 +35,7 @@ const ReviewSchema = new mongoose.Schema({
 
 // One review per rental
 ReviewSchema.index({ rental: 1 }, { unique: true });
+ReviewSchema.index({ provider: 1, createdAt: -1 });
 
 // Static method to calculate average rating for a provider
 ReviewSchema.statics.calcAverageRating = async function (providerId) {

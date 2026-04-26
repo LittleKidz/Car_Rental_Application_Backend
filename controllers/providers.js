@@ -46,7 +46,7 @@ exports.getProviders = async (req, res, next) => {
   const endIndex = page * limit;
   try {
     const total = await Provider.countDocuments();
-    query = query.skip(startIndex).limit(limit);
+    query = query.skip(startIndex).limit(limit).lean();
     //Execute Query
     const providers = await query;
 
@@ -78,7 +78,7 @@ exports.getProviders = async (req, res, next) => {
 //@access Public
 exports.getProvider = async (req, res, next) => {
   try {
-    const provider = await Provider.findById(req.params.id);
+    const provider = await Provider.findById(req.params.id).lean();
 
     if (!provider) {
       return res.status(400).json({ success: false });
@@ -95,16 +95,23 @@ exports.getProvider = async (req, res, next) => {
 //@access Public
 exports.getProviderDetail = async (req, res) => {
   try {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
     const [provider, cars, bookings, reviews] = await Promise.all([
-      Provider.findById(req.params.id),
-      Car.find({ provider: req.params.id }),
+      Provider.findById(req.params.id).lean(),
+      Car.find({ provider: req.params.id }).lean(),
       Rental.find({
         provider: req.params.id,
-        paymentStatus: { $ne: "refunded" },
-      }).select("car rentalDate returnDate"),
+        paymentStatus: { $in: ["pending", "paid"] },
+        returnDate: { $gte: startOfToday },
+      })
+        .select("car rentalDate returnDate")
+        .lean(),
       Review.find({ provider: req.params.id })
         .populate({ path: "user", select: "name" })
-        .sort({ createdAt: -1 }),
+        .sort({ createdAt: -1 })
+        .lean(),
     ]);
 
     if (!provider) {

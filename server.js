@@ -9,8 +9,8 @@ const { xss } = require("express-xss-sanitizer");
 const hpp = require("hpp");
 const cors = require("cors");
 
-//Connect to database
-connectDB();
+// Eagerly start DB connection (non-blocking — middleware below ensures it's ready per request)
+connectDB().catch((err) => console.error("Initial DB connection error:", err));
 
 const app = express();
 
@@ -55,6 +55,17 @@ app.use(mongoSanitize());
 
 //Cookie parser
 app.use(cookieParser());
+
+// Ensure DB is connected before each request (handles concurrent cold-start races)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("DB connection failed:", err.message);
+    res.status(503).json({ success: false, message: "Database unavailable" });
+  }
+});
 
 //Route files
 const providers = require("./routes/providers");
