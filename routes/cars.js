@@ -21,6 +21,119 @@ const { protect, authorize } = require("../middleware/auth");
 
 /**
  * @swagger
+ * /api/cars:
+ *   get:
+ *     summary: Get all cars (public)
+ *     tags: [Cars]
+ *     responses:
+ *       200:
+ *         description: List of all cars
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 count:   { type: integer }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Car' }
+ */
+
+/**
+ * @swagger
+ * /api/cars/{id}:
+ *   get:
+ *     summary: Get a single car by ID (public)
+ *     tags: [Cars]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Car data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:    { $ref: '#/components/schemas/Car' }
+ *       404:
+ *         description: Car not found
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *   put:
+ *     summary: Update a car by ID (admin only)
+ *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               brand:        { type: string }
+ *               model:        { type: string }
+ *               color:        { type: string }
+ *               licensePlate: { type: string }
+ *               dailyRate:    { type: number }
+ *               available:    { type: boolean }
+ *               image:        { type: string }
+ *     responses:
+ *       200:
+ *         description: Updated car
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:    { $ref: '#/components/schemas/Car' }
+ *       401:
+ *         description: Not authorized
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *   delete:
+ *     summary: Delete a car by ID (admin only)
+ *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Car deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:    { type: object }
+ *       401:
+ *         description: Not authorized
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
+
+/**
+ * @swagger
  * /api/providers/{providerId}/cars:
  *   get:
  *     summary: Get all cars for a provider
