@@ -109,9 +109,10 @@ exports.webhookPayment = async (req, res) => {
       "Your payment has been confirmed. Your booking is now active.",
     );
 
-    res
-      .status(200)
-      .json({ success: true, data: { paymentStatus: rental.paymentStatus } });
+    res.status(200).json({
+      success: true,
+      data: { paymentStatus: rental.paymentStatus, provider: rental.provider },
+    });
   } catch (err) {
     console.error(err.stack);
     res
