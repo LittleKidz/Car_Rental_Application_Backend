@@ -54,10 +54,12 @@ exports.getRentals = async (req, res) => {
   try {
     // Auto-expire pending rentals whose pickup date has passed
     if (req.user.role !== "admin") {
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
       const expired = await Rental.find({
         user: req.user.id,
         paymentStatus: "pending",
-        rentalDate: { $lt: new Date() },
+        rentalDate: { $lt: startOfToday },
       }).populate({ path: "car", select: "brand model licensePlate" });
       if (expired.length > 0) {
         await Promise.all(
