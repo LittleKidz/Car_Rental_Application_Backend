@@ -110,6 +110,11 @@ exports.getProviderDetail = async (req, res) => {
         .lean(),
       Review.find({ provider: req.params.id })
         .populate({ path: "user", select: "name" })
+        .populate({
+          path: "rental",
+          select: "rentalDate returnDate car",
+          populate: { path: "car", select: "brand model licensePlate image" },
+        })
         .sort({ createdAt: -1 })
         .lean(),
     ]);
