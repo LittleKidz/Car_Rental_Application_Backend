@@ -13,9 +13,10 @@ exports.getCarBookings = async (req, res, next) => {
     );
     const carIds = cars.map((c) => c._id);
 
-    // Find all rentals for those cars (only future/current)
+    // Find all active rentals for those cars (exclude refunded)
     const bookings = await Rental.find({
       car: { $in: carIds },
+      paymentStatus: { $ne: "refunded" },
       returnDate: { $gte: new Date() },
     }).select("car rentalDate returnDate -_id");
 
